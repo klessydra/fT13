@@ -28,7 +28,7 @@ Parameters:
 <img src="/pics/Vector Coprocessor.png" width="500">
 </p> 
 
-# Merging Klessydra-fT13 User Guide
+# Using Klessydra-fT13
 
 This guide explains how one can download and install Pulpino, and it's 
 modified version of the riscv-gnu toolchain. It also demonstrates
