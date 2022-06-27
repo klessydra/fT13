@@ -8,13 +8,16 @@ Architecture:
 
 The redundant Architecture depicted in the following figure, exploits the architecture of the IMT processor to obtain redundancy between the three hardware threads, combining both spatial and temporal redundancy obtained thanks to the Buffered TMR technique and its own applications. Klessydra-fT13 has three threads, each having their own set of signals thus incorporating spatial redundancy, with threads that follow the same instruction in an interleaved fashion, providing temporal redundancy. At the end of the execute stage of each thread, the writeback results from the corresponding thread are buffered, and then voted and written back to the Register File (RF) only after the last thread execution, in order to avoid a Write Back (WB) of an unvoted result that might have a fault. By following this idea, it is possible to use a single voted TMR RF in the WB stage triggered during the WB of the last thread. Additionally, there is some pipeline interlocking and RF bypass logic to directly pass the operands among threads avoiding long stalls as shown in Figure 2.
 
-
-![image](https://user-images.githubusercontent.com/74311792/175937695-0b872f9a-a93e-4764-9c50-ce56e22a379e.png)
+<p align="center">
+<img src="/pics/Klessydra-fT13_microarchitecture.png" width="800">
+</p> 
 
 Figure 1:
 Registerfile and Writeback stage modifications:
 
-![image](https://user-images.githubusercontent.com/74311792/175939157-ae454639-8e00-492b-af7b-9b39cf3e29ff.png)
+<p align="center">
+<img src="/pics/Klessydra-fT13_regfile_wb_modifications.png" width="700">
+</p> 
 Figure 2:
 The fT13 furhter supports the vector accelerator present in the T13 and S1.
 
