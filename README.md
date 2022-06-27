@@ -125,14 +125,14 @@ Supplimentary Information:
 
 # fT13 Configuration Parameter List
 
-The following illustrates briefly the parameters of the T13, and their usage settings.
+The following illustrates briefly the parameters of the fT13, and their usage settings.
 
 - For more details about the Klessydra processing cores, please refer to the technincal manual in Docs
 - For more details about the Klessydra runtime libraries, please refer to the software runtime manual in Docs
 
-Extensions of T13x core:
+Extensions of fT13x core:
 
-The T13 can be configed in many ways in the from the "cmake_configure.klessydra-t1-3th.gcc.sh" found in the sw forlder:
+The fT13 can be configed in many ways in the from the "cmake_configure.klessydra-ft1-3th.gcc.sh" found in the sw forlder:
 
 You will find the following generics that will be passed to the RTL. **_Read the comments next to the variables before modifying_**:
 1)  "THREAD_POOL_SIZE=3" sets the number of hardware threads. This should be set to 3.
