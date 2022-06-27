@@ -2,10 +2,20 @@
 
 # KLESSYDRA-fT13 FT PROCESSOR
 
-Intro: The Klessydra processing core family is a set of processors featuring full compliance with RISC-V, and pin-to-pin compatible with the PULPino Riscy cores. Klessydra-fT13 is a bare-metal 32-bit temprally redundant fault tolerant processor fully supporting the RV32IM from the RISC-V ISA. 
+Intro: The Klessydra processing core family is a set of processors featuring full compliance with RISC-V, and pin-to-pin compatible with the PULPino Riscy cores. Klessydra-fT13 is a bare-metal 32-bit temporally and spatial redundant fault tolerant processor fully supporting the RV32IM from the RISC-V ISA, born from Klessydra-T13 microarchitecture. 
 
 Architecture:
 
+The redundant Architecture depicted in the following figure, exploits the architecture of the IMT processor to obtain redundancy between the three hardware threads, combining both spatial and temporal redundancy obtained thanks to the Buffered TMR technique and its own applications. Klessydra-fT13 has three threads, each having their own set of signals thus incorporating spatial redundancy, with threads that follow the same instruction in an interleaved fashion, providing temporal redundancy. At the end of the execute stage of each thread, the writeback results from the corresponding thread are buffered, and then voted and written back to the Register File (RF) only after the last thread execution, in order to avoid a Write Back (WB) of an unvoted result that might have a fault. By following this idea, it is possible to use a single voted TMR RF in the WB stage triggered during the WB of the last thread. Additionally, there is some pipeline interlocking and RF bypass logic to directly pass the operands among threads avoiding long stalls as shown in Figure 2.
+
+
+![image](https://user-images.githubusercontent.com/74311792/175937695-0b872f9a-a93e-4764-9c50-ce56e22a379e.png)
+
+Figure 1:
+Registerfile and Writeback stage modifications:
+
+![image](https://user-images.githubusercontent.com/74311792/175939157-ae454639-8e00-492b-af7b-9b39cf3e29ff.png)
+Figure 2:
 The fT13 furhter supports the vector accelerator present in the T13 and S1.
 
 The Coprocessor is a highly parametrizable accelerator, with up to 256-bit SIMD+MIMD execution capabilities. It comprises the Multipurpose Functional Unit, and the Scratchpad Memory Interface. The custom instruction set supported are listed in the Technincal manuals in the Docs folder. In addition to SIMD execution, the coprocessor supports subword-SIMD to further accelerate 8-bit and 16-bit integer data types.
@@ -27,6 +37,7 @@ Parameters:
 <p align="center">
 <img src="/pics/Vector Coprocessor.png" width="500">
 </p> 
+Figure 3
 
 # Using Klessydra-fT13
 
@@ -113,3 +124,35 @@ Supplimentary Information:
 		make nameofthetest.vsim (or .vsimc to run a test without modelsim GUI)
 
 # fT13 Configuration Parameter List
+
+The following illustrates briefly the parameters of the T13, and their usage settings.
+
+- For more details about the Klessydra processing cores, please refer to the technincal manual in Docs
+- For more details about the Klessydra runtime libraries, please refer to the software runtime manual in Docs
+
+Extensions of T13x core:
+
+The T13 can be configed in many ways in the from the "cmake_configure.klessydra-t1-3th.gcc.sh" found in the sw forlder:
+
+You will find the following generics that will be passed to the RTL. **_Read the comments next to the variables before modifying_**:
+1)  "THREAD_POOL_SIZE=3" sets the number of hardware threads. This should be set to 3.
+2)	"LUTRAM_RF=0" this variable creates a LUTRAM based registerfile instead of a flip-flop based one, it is good for FPGA synthesis as LUTRAMs based regfiles are more efficient than FF based ones. **_For that fT13 version, it should be set to 0, so no LUTRAM will be used._**
+3)	"RV32E=0" this enables the embedded extension of the RISCV ISA, and makes the regfile to be half its original size (16 regs only).
+4)	"RV32M=1" this enable the M-extension of the RISCV ISA. The mul instruction is a single cycle instructions, and the mulh/hu/hsu instructions need 3 cycles. divisions are slow, and can be up to 32 cycles, however fast single cycle divisions are availabe for special cases (div by 0, numerator < denominator, numerator is 0, and numerator equals the denominator).
+5)	"superscalar_exec_en=1"  Enables superscalar execution when set to 1, else the stall of the pipeline will depend on tha latency of the instruction executing. This more than doubles the speed of the core in many applications, however if in the exceptional case the RTL is not simulating correctly, disable this and see whether the RTL will work again.
+6)	"accl_en=0"  Enables the generation of the hardware accelerator of the T13. **_Its use in fT13 has not yet been debugged, so it should be set to 0_**
+7)	"replicate_accl_en=0" Once set, it replicates the accelerator for every thread, this increases the parallelism of the fT13 by allocating a dedicated accelerator for each hart in the fT13. It should b set to 1 in order to have TMR replicas of the single VCUs. **_Its use in fT13 has not yet been debugged, so it should be set to 0_**
+8)	"multithreaded_accl_en=0" Set this to 1 to let the replicated accelerator have shared functional units, but maintain dedicated SPM memories for each hardware thread (note: replicate_accl_en must be set to '1').
+9)	"SPM_NUM = 3 " The number of scratchpads available "Minimum allowed is 2". When the acclerator is replicated, each hardware thread will have scratchpads equal to SPM_NUM, so in a THREAD_POOL_SIZE of 3 we will have 3*SPM_NUM scratchpads in totals. **_Its use in fT13 has not yet been debugged._**
+10)	Addr_Width = 13" This address is for scratchpads. Setting this will make the size of the spm to be: "2^Addr_Width -1"
+11)	"SIMD = 1" Changing the SIMD, would increase the DLP by increasing the number of the functional units in the accelerator, and the number of banks in the spms acordingly (can be power of 2 only e.g. 1,2,4,8) no more than SIMD 8 is allowed. Setting this to '8' with replicate_accl_en and superscalar_exec_en being set to '1' as well will make the accelerator run at peak performance. **_Its use in fT13 has not yet been debugged._**
+12)	"MCYCLE_EN" Can be set to 1 or 0 only. Setting to zero will disable MCYCLE and MCYCLEH
+13)	"MINSTRET_EN" Can be set to 1 or 0 only. Setting to zero will disable MINSTRET and MINSTRETH
+14)	"MHPMCOUNTER_EN" Can be set to 1 or 0 only. Setting to zero will disable all performance counters except "MCYCLE/H" and "MINSTRET/H"
+15)	"count_all" Perfomance counters count for all the harts instead of there own hart
+16)	"debug_en" Generates the debug unit, the debug unit is elimentary and might need some further evaluation and testing
+17)	"tracer_en" Generates an instruction tracer, used for debugging
+
+
+Hope you like it :D
+
