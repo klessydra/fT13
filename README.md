@@ -1,6 +1,6 @@
 <img src="/pics/Klessydra_Logo.png" width="400">
 
-# KLESSYDRA-fT13 FT PROCESSOR
+# KLESSYDRA-fT13 PROCESSOR
 
 Intro: The Klessydra processing core family is a set of processors featuring full compliance with RISC-V, and pin-to-pin compatible with the PULPino Riscy cores. Klessydra-fT13 is a bare-metal 32-bit temporally and spatial redundant fault tolerant processor fully supporting the RV32IM from the RISC-V ISA, born from Klessydra-T13 microarchitecture. 
 
